@@ -87,6 +87,6 @@ def main():
                     send_telegram('Nueva prueba disponible el ' + date.strftime('%d/%m/%Y') + ': ' + name)
                 elif x['Reglamento'] != data['Reglamento']:
                     airtable.update(x['id'], data)
-                    send_telegram('Nuevo reglamento disponible para la prueba ' + name + 'el ' + date.strftime('%d/%m/%Y') + ': ' + rules)
+                    send_telegram('Nuevo reglamento disponible para la prueba ' + name + ' el ' + date.strftime('%d/%m/%Y') + ': ' + rules)
 
 main()
