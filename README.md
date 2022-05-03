@@ -22,3 +22,9 @@ pip install -r requirements.txt
 ```
 
 Para replicarlo es necesario crear un bot y canal de Telegram y una tabla en airtable y actualizar en el fichero .env los valores correspondientes a API keys y IDs de chat / tabla.
+
+Si además se quiere programar para que se ejecute con cierta frecuencia se puede programar en crontab:
+
+```
+0 9-19 * * 1-5 /bin/python /data/fam-calendar/index.py
+```
