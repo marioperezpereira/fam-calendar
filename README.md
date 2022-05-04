@@ -26,5 +26,5 @@ Para replicarlo es necesario crear un bot y canal de Telegram y una tabla en air
 Si además se quiere programar para que se ejecute con cierta frecuencia se puede programar en crontab:
 
 ```
-0 9-19 * * 1-5 /bin/python /data/fam-calendar/index.py
+0 9-19 * * 1-5 python3 PATH/fam-calendar/index.py
 ```
