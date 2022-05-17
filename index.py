@@ -31,6 +31,8 @@ def main():
             record['Inscritos'] = ''
         if 'Lugar' not in record:
             record['Lugar'] = ''
+        if 'Categoría' not in record:
+            record['Categoría'] = ''
 
         records.append({
             'id': row['id'],
