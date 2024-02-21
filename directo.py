@@ -4,7 +4,7 @@ import re
 from decouple import config
 from datetime import datetime
 from bs4 import BeautifulSoup
-from pyairtable import Table, formulas
+from pyairtable import Api
 
 def send_telegram(message):
 
@@ -14,7 +14,8 @@ def send_telegram(message):
 
 def main():
 
-    airtable = Table(config('AIRTABLE_APIKEY'), config('AIRTABLE_DOC_ID'),config('AIRTABLE_DIRECTOS_TABLE_ID'))
+    api = Api(config('AIRTABLE_APIKEY'))
+    airtable = api.table(config('AIRTABLE_DOC_ID'),config('AIRTABLE_DIRECTOS_TABLE_ID'))
 
     records = records_new = list()
 

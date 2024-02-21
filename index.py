@@ -1,10 +1,11 @@
 # coding=utf8
 import requests
+import os
 import re
 from decouple import config
 from datetime import datetime
 from bs4 import BeautifulSoup
-from pyairtable import Table, formulas
+from pyairtable import Api
 
 def send_telegram(message):
 
@@ -15,9 +16,10 @@ def send_telegram(message):
 def main():
 
     currentMonth = datetime.now().month
-    currentYear = 2022
+    currentYear = datetime.now().year
 
-    airtable = Table(config('AIRTABLE_APIKEY'), config('AIRTABLE_DOC_ID'),config('AIRTABLE_TABLE_ID'))
+    api = Api(config('AIRTABLE_APIKEY'))
+    airtable = api.table(config('AIRTABLE_DOC_ID'),config('AIRTABLE_TABLE_ID'))
 
     records = records_new = list()
 
@@ -33,6 +35,10 @@ def main():
             record['Lugar'] = ''
         if 'Categoría' not in record:
             record['Categoría'] = ''
+        if 'Nombre' not in record:
+            record['Nombre'] = ''
+        if 'Fecha' not in record:
+            record['Fecha'] = ''
 
         records.append({
             'id': row['id'],
@@ -47,8 +53,11 @@ def main():
         
     # Gets all current and next month data
     if currentMonth == 12:
-        months = [12,1]
-        seasons = [currentYear, currentYear+1]
+        months = [12,1,2]
+        seasons = [currentYear, currentYear+1, currentYear+1]
+    elif currentMonth == 11:
+      months = [11,12,1]
+      seasons = [currentYear, currentYear, currentYear+1]
     else:
         months = [currentMonth, currentMonth+1, currentMonth+2]
         seasons = [currentYear, currentYear, currentYear]
@@ -75,31 +84,34 @@ def main():
 
                 date = datetime(seasons[index], month, int(cols[0].text.strip().split('.')[0].split('y')[0].split('-')[0]))
 
-                name = cols[1].text.strip()
-                place = cols[2].text.strip()
-                rules = cols[3].a
-                participants = cols[4].a
-                results = cols[5].a
+                name = cols[2].text.strip()
+                place = cols[3].text.strip()
+                rules = cols[4].a
+                participants = cols[5].a
+                results = cols[6].a
 
                 if (rules is not None):
                     rules = re.sub("pdf?(.*)", "pdf", rules.get('href').strip().replace(" ", "%20"))
+                    rules = re.sub("docx?(.*)", "docx", rules)
                 else:
                     rules = ''
 
                 if (participants is not None):
                     participants = re.sub("pdf?(.*)", "pdf", participants.get('href').strip().replace(" ", "%20"))
+                    participants = re.sub("docx?(.*)", "docx", participants)
                 else:
                     participants = ''
 
 
                 if (results is not None):
                     results = re.sub("pdf?(.*)", "pdf", results.get('href').strip().replace(" ", "%20"))
+                    results = re.sub("docx?(.*)", "docx", results )
                 else:
                     results = ''
                 
-                category = cols[6].text.strip()
-
-                x = next((x for x in records if x['Nombre'] == name), None)
+                category = cols[7].text.strip()
+                
+                x = next((x for x in records if x['Nombre'] == name and x['Fecha'] == date.strftime("%Y-%m-%d")), None)
 
                 data = {
                     'Nombre': name, 
@@ -114,13 +126,14 @@ def main():
                 if x is None:
                     airtable.create(data)
                     send_telegram('Nueva prueba disponible el ' + date.strftime('%d/%m/%Y') + ': ' + name)
-                elif x['Reglamento'] != data['Reglamento']:
+                else:
+                  if x['Reglamento'] != data['Reglamento']:
                     airtable.update(x['id'], data)
                     send_telegram('Nuevo reglamento disponible para la prueba ' + name + ' del ' + date.strftime('%d/%m/%Y') + ': ' + rules)
-                elif x['Resultados'] != data['Resultados']:
+                  if x['Resultados'] != data['Resultados']:
                     airtable.update(x['id'], data)
                     send_telegram('Resultados disponibles para la prueba ' + name + ' del ' + date.strftime('%d/%m/%Y') + ': ' + results)
-                elif x['Inscritos'] != data['Inscritos']:
+                  if x['Inscritos'] != data['Inscritos']:
                     airtable.update(x['id'], data)
                     send_telegram('Inscritos disponibles para la prueba ' + name + ' del ' + date.strftime('%d/%m/%Y') + ': ' + participants)
 
