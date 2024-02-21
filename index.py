@@ -8,7 +8,7 @@ from pyairtable import Api
 
 def send_telegram(message):
 
-    url = "https://api.telegram.org/bot" + TELEGRAM_BOT_TOKEN + "/sendMessage?chat_id=" + TELEGRAM_CHAT_ID + "&text=" + message
+    url = "https://api.telegram.org/bot" + config('TELEGRAM_BOT_TOKEN') + "/sendMessage?chat_id=" + config('TELEGRAM_CHAT_ID') + "&text=" + message
     response = requests.get(url)
     return response
 
